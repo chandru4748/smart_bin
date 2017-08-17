@@ -1,0 +1,112 @@
+#include "SIM900.h"
+#include <SoftwareSerial.h>
+#include "sms.h" 
+SMSGSM sms;
+int numdata;
+boolean started=false;
+char smsbuffer[160];
+char n[20];
+
+#define trigPin1 6
+#define echoPin1 7
+#define trigPin2 10
+#define echoPin2 11
+
+long duration,distance,RightSensor,LeftSensor;
+ int t1=0,t2=0;
+void setup()
+{
+Serial.begin (9600);
+pinMode(trigPin1, OUTPUT);
+pinMode(echoPin1, INPUT);
+pinMode(trigPin2, OUTPUT);
+pinMode(echoPin2, INPUT);
+ Serial.println("GSM Shield testing.");
+    if (gsm.begin(2400)) {
+          Serial.println("\nstatus=READY");
+         
+          started=true;
+     } else 
+     Serial.println("\nstatus=IDLE");
+
+     if(started) {
+          if (sms.SendSMS("9710359180", "Dust Bin Monitor Ready"))// change ur mobile no here
+     {
+          Serial.println("\nSMS sent OK");
+     }}
+   
+   };
+
+
+void loop() {
+SonarSensor(trigPin1, echoPin1);
+RightSensor = distance;
+SonarSensor(trigPin2, echoPin2);
+LeftSensor = distance;
+
+
+if(LeftSensor!=t1){
+  t1=LeftSensor;
+if(LeftSensor==14)
+{
+  //mySerial.println("dustbin1 0");
+  Serial.println("dustbin1 0");
+  sms.SendSMS("9710359180", "Dust Bin1:Empty");
+  //delay(3000);
+}
+ if(LeftSensor==7)
+{
+  //mySerial.println("dustbin1 50");
+  Serial.println("dustbin1 50");
+  sms.SendSMS("9710359180", "Dust Bin1:Half");
+  //delay(3000);
+}
+ if(LeftSensor==3)
+{
+  //mySerial.println("dustbin1 100");
+  Serial.println("dustbin1 100");
+  sms.SendSMS("9710359180", "Dust Bin1:Full");
+  //delay(3000);
+}
+}
+
+delay(2000);
+if(RightSensor!=t2){
+  t2=RightSensor;
+  
+if(RightSensor==14)
+{
+  //mySerial.println("dustbin2 0");
+  Serial.println("dustbin2 0");
+  sms.SendSMS("9710359180", "Dust Bin2:Empty");
+  //delay(3000);
+}
+if(RightSensor==7)
+{
+  
+  //mySerial.println("dustbin2 50");
+  Serial.println("dustbin2 50");
+  sms.SendSMS("9710359180", "Dust Bin2:Half");
+  //delay(3000);
+}
+if(RightSensor==4)
+{
+  //mySerial.println("dustbin2 100");
+  Serial.println("dustbin2 100");
+  sms.SendSMS("9710359180", "Dust Bin2:Full");
+  //delay(3000);
+}
+}
+}
+
+void SonarSensor(int trigPin,int echoPin)
+{
+digitalWrite(trigPin, LOW);
+delayMicroseconds(2);
+digitalWrite(trigPin, HIGH);
+delayMicroseconds(10);
+digitalWrite(trigPin, LOW);
+duration = pulseIn(echoPin, HIGH);
+distance = (duration/2) / 29;
+
+}
